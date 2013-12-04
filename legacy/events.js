@@ -1,13 +1,14 @@
 if (!Element.prototype.addEventListener) {
     var docEl = document.documentElement,
-        button = Object.getOwnPropertyDescriptor(Event.prototype, "button");
+        buttonGetter = Object.getOwnPropertyDescriptor(Event.prototype, "button").get;
 
     HTMLDocument.prototype.addEventListener =
-    Element.prototype.addEventListener = function(type, fCallback, capture) {
-        var modtypeForIE = "on" + type;
-
+    Element.prototype.addEventListener = function(type, fCallback) {
         var nodeWithListener = this;
-        this.attachEvent(modtypeForIE, function (e) {
+        // IE8 doesn't support onscroll on document level
+        if (this === document && type === "scroll") nodeWithListener = window;
+
+        fCallback._ = function(e) {
             // Add some extensions directly to 'e' (the actual event instance)
             // Create the 'currentTarget' property (read-only)
             Object.defineProperty(e, "currentTarget", {
@@ -27,11 +28,21 @@ if (!Element.prototype.addEventListener) {
             });
             // Call the function handler callback originally provided...
             fCallback.call(nodeWithListener, e); // Re-bases 'this' to be correct for the callback.
-        });
+        };
+
+        nodeWithListener.attachEvent("on" + type, fCallback._);
+    };
+
+    HTMLDocument.prototype.removeEventListener =
+    Element.prototype.removeEventListener = function(type, fCallback) {
+        var nodeWithListener = this;
+        // IE8 doesn't support onscroll on document level
+        if (this === document && type === "scroll") nodeWithListener = window;
+
+        nodeWithListener.detachEvent("on" + type, fCallback._);
     };
 
     // Extend Event.prototype with a few of the W3C standard APIs on Event
-    // Add 'target' object (read-only)
     Object.defineProperty(Event.prototype, "target", {
         get: function() {
             return this.srcElement;
@@ -54,7 +65,7 @@ if (!Element.prototype.addEventListener) {
     });
     Object.defineProperty(Event.prototype, "button", {
         get: function() {
-            var button = button.call(this);
+            var button = buttonGetter.call(this);
             // click: 1 === left; 2 === middle; 3 === right
             return button & 1 ? 1 : ( button & 2 ? 3 : ( button & 4 ? 2 : 0 ) );
         }
@@ -69,7 +80,6 @@ if (!Element.prototype.addEventListener) {
             return this.clientY + docEl.scrollTop - docEl.clientTop;
         }
     });
-    // Add 'stopPropagation' and 'preventDefault' methods
     Event.prototype.stopPropagation = function () {
         this.cancelBubble = true;
     };

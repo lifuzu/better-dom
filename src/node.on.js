@@ -1,8 +1,7 @@
 var _ = require("./utils"),
     $Node = require("./node"),
     EventHandler = require("./eventhandler"),
-    hooks = require("./node.on.hooks"),
-    features = require("./features");
+    hooks = require("./node.on.hooks");
 
 /**
  * Bind a DOM event to the context
@@ -72,14 +71,7 @@ $Node.prototype.on = function(type, context, callback, props, /*INTERNAL*/once) 
 
         if (hook = hooks[type]) hook(handler);
 
-        if (features.DOM2_EVENTS) {
-            node.addEventListener(handler._type || type, handler, !!handler.capturing);
-        } else {
-            // IE8 doesn't support onscroll on document level
-            if (el === DOM && type === "scroll") node = window;
-
-            node.attachEvent("on" + (handler._type || type), handler);
-        }
+        node.addEventListener(handler._type || type, handler, !!handler.capturing);
         // store event entry
         el._listeners.push(handler);
     });
