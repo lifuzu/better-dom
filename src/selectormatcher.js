@@ -8,7 +8,9 @@ var _ = require("./utils"),
     matchesProp = _.foldl("m oM msM mozM webkitM".split(" "), function(result, prefix) {
         var propertyName = prefix + "atchesSelector";
 
-        if (!result) return document.documentElement[propertyName] && propertyName;
+        if (!result && document.documentElement[propertyName]) result = propertyName;
+
+        return result;
     }, null);
 
 module.exports = function(selector) {
@@ -27,11 +29,7 @@ module.exports = function(selector) {
     return function(el) {
         if (el.nodeType !== 1) return false;
 
-        if (!quick) {
-            if (matchesProp) return el[matchesProp](selector);
-
-            return _.some(document.querySelectorAll(selector), function(x) { return x === el });
-        }
+        if (!quick) return el[matchesProp](selector);
 
         return (
             (!quick[1] || el.nodeName.toLowerCase() === quick[1]) &&
