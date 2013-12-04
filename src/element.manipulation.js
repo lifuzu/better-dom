@@ -1,6 +1,5 @@
 var _ = require("./utils"),
-    $Element = require("./element"),
-    features = require("./features");
+    $Element = require("./element");
 
 function makeManipulationMethod(methodName, fasterMethodName, standalone, strategy) {
     return function() {
@@ -38,7 +37,7 @@ function makeManipulationMethod(methodName, fasterMethodName, standalone, strate
             });
 
             // always use _parseFragment because of HTML5 and NoScope bugs in legacy IE
-            if ((!fasterMethodName || features.CSS3_ANIMATIONS) && html) value = _.parseFragment(html);
+            if (!fasterMethodName && html) value = _.parseFragment(html);
 
             if (!fasterMethodName || value) {
                 strategy(node, value);

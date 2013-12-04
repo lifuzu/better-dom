@@ -70,11 +70,7 @@ function EventHandler(type, selector, context, callback, props, currentTarget) {
 
             if (fn.apply(context, args) === false) {
                 // prevent default if handler returns false
-                if (features.DOM2_EVENTS) {
-                    e.preventDefault();
-                } else {
-                    e.returnValue = false;
-                }
+                e.preventDefault();
             }
         };
 

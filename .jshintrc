@@ -41,6 +41,8 @@
 
         "suite": true,
         "benchmark": true,
-        "jQuery": true
+        "jQuery": true,
+        "Event": true,
+        "HTMLDocument": true
     }
 }
