@@ -131,8 +131,7 @@ module.exports = {
             var fragment = document.createDocumentFragment();
 
             // fix NoScope bug
-            parser.innerHTML = "<br>" + html;
-            parser.removeChild(parser.firstChild);
+            parser.innerHTML = html;
 
             while (parser.firstChild) fragment.appendChild(parser.firstChild);
 

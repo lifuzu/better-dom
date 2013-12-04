@@ -148,6 +148,26 @@ module.exports = function(grunt) {
             }
         },
         browserify: {
+            legacy: {
+                files: {
+                    "build/better-dom-legacy.js": ["legacy/*.js", "bower_components//html5shiv/dist/html5shiv.js"]
+                },
+                options: {
+                    postBundleCB: function(err, src, next) {
+                        // append copyrights header
+                        next(err, grunt.template.process(
+                            "/**\n" +
+                            " * @file <%= pkg.name %>-legacy.js\n" +
+                            " * @version <%= pkg.version %> <%= grunt.template.today('isoDateTime') %>\n" +
+                            " * @overview <%= pkg.description %>\n" +
+                            " * @copyright <%= pkg.author %> <%= grunt.template.today('yyyy') %>\n" +
+                            " * @license <%= pkg.license %>\n" +
+                            " * @see <%= pkg.repository.url %>\n" +
+                            " */\n" +
+                        src));
+                    }
+                }
+            },
             compile: {
                 files: {
                     "build/better-dom.js": ["src/*.js"]
@@ -159,7 +179,7 @@ module.exports = function(grunt) {
                         // append copyrights header
                         next(err, grunt.template.process(
                             "/**\n" +
-                            " * @file <%= pkg.name %>\n" +
+                            " * @file <%= pkg.name %>.js\n" +
                             " * @version <%= pkg.version %> <%= grunt.template.today('isoDateTime') %>\n" +
                             " * @overview <%= pkg.description %>\n" +
                             " * @copyright <%= pkg.author %> <%= grunt.template.today('yyyy') %>\n" +
