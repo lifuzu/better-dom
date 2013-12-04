@@ -15,7 +15,7 @@ module.exports = function(grunt) {
                 tasks: ["karma:coverage:run"]
             },
             build: {
-                files: ["src/*.js"],
+                files: ["src/*.js", "legacy/*.js"],
                 tasks: ["browserify", "karma:coverage:run"]
             }
         },
@@ -150,7 +150,7 @@ module.exports = function(grunt) {
         browserify: {
             legacy: {
                 files: {
-                    "build/better-dom-legacy.js": ["legacy/*.js", "bower_components//html5shiv/dist/html5shiv.js"]
+                    "build/better-dom-legacy.js": ["legacy/*.js", "bower_components//html5shiv/src/html5shiv.js"]
                 },
                 options: {
                     postBundleCB: function(err, src, next) {
