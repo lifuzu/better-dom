@@ -4,7 +4,6 @@
 var _ = require("./utils"),
     $Element = require("./element"),
     SelectorMatcher = require("./selectormatcher"),
-    hooks = require("./eventhandler.hooks"),
     debouncedEvents = "scroll mousemove",
     createDebouncedEventWrapper = function(originalHandler, debouncing) {
         return function(e) {
@@ -25,11 +24,9 @@ function EventHandler(type, selector, context, callback, props, currentTarget) {
 
     var matcher = SelectorMatcher(selector),
         handler = function(e) {
-            if (EventHandler.skip === type) return; // early stop in case of default action
+            if (EventHandler.skip === type) return; // early stop in case of default action;
 
-            e = e || window.event;
-
-            var target = e.target || e.srcElement,
+            var target = e.target,
                 root = currentTarget._node,
                 fn = typeof callback === "string" ? context[callback] : callback,
                 args = props || ["target", "defaultPrevented"];
@@ -46,23 +43,20 @@ function EventHandler(type, selector, context, callback, props, currentTarget) {
                     return type;
                 case "currentTarget":
                     return currentTarget;
+                case "relatedTarget":
+                    return $Element(e.relatedTarget);
                 case "target":
-                    // handle DOM variable correctly
-                    return target ? $Element(target) : DOM;
+                    return $Element(target);
                 }
 
-                var hook = hooks[name];
-
-                return hook ? hook(e, root) : e[name];
+                return e[name];
             });
 
             // prepend extra arguments if they exist
             if (e._args && e._args.length) args = e._args.concat(args);
 
-            if (fn.apply(context, args) === false) {
-                // prevent default if handler returns false
-                e.preventDefault();
-            }
+            // prevent default if handler returns false
+            if (fn.apply(context, args) === false) e.preventDefault();
         };
 
     if (~debouncedEvents.indexOf(type)) handler = createDebouncedEventWrapper(handler);

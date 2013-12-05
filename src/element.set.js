@@ -1,6 +1,5 @@
 var _ = require("./utils"),
     $Element = require("./element"),
-    hooks = require("./element.set.hooks"),
     features = require("./features");
 
 /**
@@ -17,8 +16,6 @@ $Element.prototype.set = function(name, value) {
         nameType = typeof name;
 
     return this.legacy(function(node, el, index) {
-        var hook;
-
         name = originalName;
         value = originalValue;
 
@@ -51,9 +48,7 @@ $Element.prototype.set = function(name, value) {
 
         if (typeof value === "function") value = value(el, index);
 
-        if (hook = hooks[name]) {
-            hook(node, value);
-        } else if (value == null) {
+        if (value == null) {
             node.removeAttribute(name);
         } else if (name in node) {
             node[name] = value;

@@ -1,6 +1,5 @@
 var _ = require("./utils"),
-    $Element = require("./element"),
-    hooks = require("./element.get.hooks");
+    $Element = require("./element");
 
 /**
  * Get property or attribute value by name
@@ -9,8 +8,7 @@ var _ = require("./utils"),
  * @see https://github.com/chemerisuk/better-dom/wiki/Getter-and-setter
  */
 $Element.prototype.get = function(name) {
-    var node = this._node,
-        hook = hooks[name];
+    var node = this._node;
 
     if (!node) return;
 
@@ -26,5 +24,8 @@ $Element.prototype.get = function(name) {
         throw _.makeError("get", this);
     }
 
-    return hook ? hook(node, name) : (name in node ? node[name] : node.getAttribute(name));
+    // some browsers don't recognize input[type=email] etc.
+    if (name === "type") return node.getAttribute("type") || node.type;
+
+    return name in node ? node[name] : node.getAttribute(name);
 };
