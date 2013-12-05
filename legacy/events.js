@@ -5,7 +5,7 @@ if (!Element.prototype.addEventListener) {
 
     Object.defineProperty(Event.prototype, "target", {
         get: function() {
-            return this.srcElement;
+            return this.srcElement || document; /* IE returns null if target is document */
         }
     });
     Object.defineProperty(Event.prototype, "relatedTarget", {
