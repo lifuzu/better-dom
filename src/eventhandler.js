@@ -4,16 +4,8 @@
 var _ = require("./utils"),
     $Element = require("./element"),
     SelectorMatcher = require("./selectormatcher"),
-    features = require("./features"),
     hooks = require("./eventhandler.hooks"),
     debouncedEvents = "scroll mousemove",
-    createCustomEventWrapper = function(originalHandler, type) {
-        var handler = function() { if (window.event.srcUrn === type) originalHandler() };
-
-        handler._type = "dataavailable";
-
-        return handler;
-    },
     createDebouncedEventWrapper = function(originalHandler, debouncing) {
         return function(e) {
             if (!debouncing) {
@@ -26,8 +18,7 @@ var _ = require("./utils"),
                 });
             }
         };
-    },
-    testEl = document.createElement("div");
+    };
 
 function EventHandler(type, selector, context, callback, props, currentTarget) {
     context = context || currentTarget;
@@ -74,12 +65,7 @@ function EventHandler(type, selector, context, callback, props, currentTarget) {
             }
         };
 
-    if (~debouncedEvents.indexOf(type)) {
-        handler = createDebouncedEventWrapper(handler);
-    } else if (!features.DOM2_EVENTS && (type === "submit" || !("on" + type in testEl))) {
-        // handle custom events for IE8
-        handler = createCustomEventWrapper(handler, type);
-    }
+    if (~debouncedEvents.indexOf(type)) handler = createDebouncedEventWrapper(handler);
 
     return handler;
 }

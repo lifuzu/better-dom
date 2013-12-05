@@ -1,8 +1,7 @@
 var _ = require("./utils"),
     $Node = require("./node"),
     EventHandler = require("./eventhandler"),
-    hooks = require("./node.on.hooks"),
-    features = require("./features");
+    hooks = require("./node.on.hooks");
 
 /**
  * Triggers an event of specific type with optional extra arguments
@@ -20,28 +19,15 @@ $Node.prototype.fire = function(type) {
         var node = el._node,
             hook = hooks[type],
             handler = {},
-            isCustomEvent, canContinue, e;
+            e = document.createEvent("HTMLEvents"),
+            canContinue;
 
         if (hook) hook(handler);
 
-        if (features.DOM2_EVENTS) {
-            e = document.createEvent("HTMLEvents");
+        e.initEvent(handler._type || type, true, true);
+        e._args = args;
 
-            e.initEvent(handler._type || type, true, true);
-            e._args = args;
-
-            canContinue = node.dispatchEvent(e);
-        } else {
-            isCustomEvent = handler.custom || !("on" + type in node);
-            e = document.createEventObject();
-            // store original event type
-            e.srcUrn = isCustomEvent ? type : undefined;
-            e._args = args;
-
-            node.fireEvent("on" + (isCustomEvent ? "dataavailable" : handler._type || type), e);
-
-            canContinue = e.returnValue !== false;
-        }
+        canContinue = node.dispatchEvent(e);
 
         // Call native method. IE<9 dies on focus/blur to hidden element
         if (canContinue && node[type] && (type !== "focus" && type !== "blur" || node.offsetWidth)) {

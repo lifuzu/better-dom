@@ -46,4 +46,10 @@ if (!Element.prototype.addEventListener) {
     Event.prototype.preventDefault = function () {
         this.returnValue = false;
     };
+
+    Event.prototype.initEvent = function(type, bubbles, cancelable) {
+        this.type = type;
+        this.cancelBubble = !bubbles;
+        this.returnValue = !cancelable;
+    };
 }
