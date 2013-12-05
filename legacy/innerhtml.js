@@ -1,5 +1,4 @@
 // NoScope fix
-
 var innerHTML = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
 
 Object.defineProperty(Element.prototype, "innerHTML", {
