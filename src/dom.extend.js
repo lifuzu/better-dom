@@ -16,7 +16,11 @@ var _ = require("./utils"),
         return function(ext, index) {
             // skip previously excluded or mismatched elements
             if (!accepted[index] && ext.accept(node)) {
-                node.addEventListener(type, ext.stop, false);
+                if (features.CSS3_ANIMATIONS) {
+                    node.addEventListener(type, ext.stop, false);
+                } else {
+                    node.attachEvent("on" + type, ext.stop);
+                }
                 // return true to reduce number of unnecessary iterations
                 return !ext(el);
             }

@@ -1,42 +1,16 @@
 var _ = require("./utils"),
     DOM = require("./dom"),
-    features = require("./features"),
     readyCallbacks = [],
     readyState = document.readyState,
-    isTop, testDiv, scrollIntervalId;
+    pageLoaded = function() {
+        // safely trigger callbacks
+        _.forEach(readyCallbacks, setTimeout);
+        // cleanup
+        readyCallbacks = null;
+    };
 
-function pageLoaded() {
-    // safely trigger callbacks
-    _.forEach(readyCallbacks, function(callback) { setTimeout(callback, 0) });
-    // cleanup
-    readyCallbacks = null;
-
-    if (scrollIntervalId) clearInterval(scrollIntervalId);
-}
-
-if (features.DOM2_EVENTS) {
-    document.addEventListener("DOMContentLoaded", pageLoaded, false);
-    window.addEventListener("load", pageLoaded, false);
-} else {
-    window.attachEvent("onload", pageLoaded);
-
-    testDiv = document.createElement("div");
-    try {
-        isTop = window.frameElement === null;
-    } catch (e) {}
-
-    // DOMContentLoaded approximation that uses a doScroll, as found by
-    // Diego Perini: http://javascript.nwbox.com/IEContentLoaded/,
-    // but modified by other contributors, including jdalton
-    if (testDiv.doScroll && isTop && window.external) {
-        scrollIntervalId = setInterval(function () {
-            try {
-                testDiv.doScroll();
-                pageLoaded();
-            } catch (e) {}
-        }, 30);
-    }
-}
+document.addEventListener("DOMContentLoaded", pageLoaded, false);
+window.addEventListener("load", pageLoaded, false);
 
 // Catch cases where ready is called after the browser event has already occurred.
 // IE10 and lower don't handle "interactive" properly... use a weak inference to detect it
@@ -46,7 +20,7 @@ if (document.attachEvent ? readyState === "complete" : readyState !== "loading")
 }
 
 /**
- * Execute callback when DOM is ready
+ * Asynchronously execute callback when DOM is ready
  * @memberOf DOM
  * @param {Function} callback event listener
  */

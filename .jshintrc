@@ -43,6 +43,7 @@
         "benchmark": true,
         "jQuery": true,
         "Event": true,
-        "HTMLDocument": true
+        "HTMLDocument": true,
+        "Window": true
     }
 }

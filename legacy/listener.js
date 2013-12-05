@@ -8,7 +8,8 @@ function fireEventFor(node, type) {
 
 if (!Element.prototype.addEventListener) {
     HTMLDocument.prototype.addEventListener =
-    Element.prototype.addEventListener = function(type, fCallback) {
+    Element.prototype.addEventListener =
+    Window.prototype.addEventListener = function(type, fCallback) {
         var context = this,
             isCustomEvent = type === "submit" || !("on" + type in this);
         // IE8 doesn't support onscroll on document level
@@ -42,7 +43,8 @@ if (!Element.prototype.addEventListener) {
     };
 
     HTMLDocument.prototype.removeEventListener =
-    Element.prototype.removeEventListener = function(type, fCallback) {
+    Element.prototype.removeEventListener =
+    Window.prototype.removeEventListener = function(type, fCallback) {
         var context = this,
             isCustomEvent = type === "submit" || !("on" + type in this);
         // IE8 doesn't support onscroll on document level
@@ -99,37 +101,35 @@ if (!Element.prototype.addEventListener) {
             }
         };
     })());
+
+    // DOMContentLoaded inplementation
+    (function() {
+        var testDiv = document.createElement("div"),
+            isTop, scrollIntervalId;
+
+        try {
+            isTop = window.frameElement === null;
+        } catch (e) {}
+
+        // DOMContentLoaded approximation that uses a doScroll, as found by
+        // Diego Perini: http://javascript.nwbox.com/IEContentLoaded/,
+        // but modified by other contributors, including jdalton
+        if (testDiv.doScroll && isTop && window.external) {
+            scrollIntervalId = setInterval(function () {
+                var trigger = true;
+
+                try {
+                    testDiv.doScroll();
+                } catch (e) {
+                    trigger = false;
+                }
+
+                if (trigger) {
+                    clearInterval(scrollIntervalId);
+
+                    fireEventFor(document, "DOMContentLoaded");
+                }
+            }, 30);
+        }
+    }());
 }
-
-// input event fix via propertychange
-document.attachEvent("onfocusin", (function() {
-    var legacyEventHandler = function() {
-            if (capturedNode && capturedNode.value !== capturedNodeValue) {
-                capturedNodeValue = capturedNode.value;
-                // trigger special event that bubbles
-                fireEventFor(capturedNode, "input");
-            }
-        },
-        capturedNode, capturedNodeValue;
-
-    if (document.createElement("input").oninput) {
-        // IE9 doesn't fire oninput when text is deleted, so use
-        // legacy onselectionchange event to detect such cases
-        // http://benalpert.com/2013/06/18/a-near-perfect-oninput-shim-for-ie-8-and-9.html
-        document.attachEvent("onselectionchange", legacyEventHandler);
-    }
-
-    return function() {
-        var target = window.event.srcElement,
-            type = target.type;
-
-        if (capturedNode) {
-            capturedNode.detachEvent("onpropertychange", legacyEventHandler);
-            capturedNode = undefined;
-        }
-
-        if (type === "text" || type === "password" || type === "textarea") {
-            (capturedNode = target).attachEvent("onpropertychange", legacyEventHandler);
-        }
-    };
-})());
