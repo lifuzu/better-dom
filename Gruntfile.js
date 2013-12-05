@@ -150,7 +150,11 @@ module.exports = function(grunt) {
         browserify: {
             legacy: {
                 files: {
-                    "build/better-dom-legacy.js": ["legacy/*.js", "bower_components//html5shiv/src/html5shiv-printshiv.js"]
+                    "build/better-dom-legacy.js": [
+                        "legacy/*.js",
+                        "bower_components/html5shiv/src/html5shiv-printshiv.js",
+                        "bower_components/es5-shim/es5-shim.js"
+                    ]
                 },
                 options: {
                     postBundleCB: function(err, src, next) {
